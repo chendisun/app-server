@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="appservice" default="build" basedir=".">
+	<property name="src.dir" location="${basedir}/src" />
+	<property name="out.dir" location="${basedir}/${ant.project.name}" />
+	<property name="classes.dir" location="${out.dir}/WEB-INF/classes" />
+
+	<path id="project.class.path">
+	    <pathelement location="${classes.dir}" />
+	    <fileset dir="war/WEB-INF/lib" includes="**/*.jar"/>
+	 </path>
+	 
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+        <classpath>
+            <pathelement location="${basedir}/war/WEB-INF/lib/ant-contrib-1.0b3.jar"/>
+        </classpath>
+	</taskdef>
+	
+	<target name="clear">
+		<delete dir="${basedir}/war/gen" failonerror="no" />
+		<delete dir="${basedir}/war/WEB-INF/deploy" failonerror="no" />
+		<delete dir="${out.dir}" failonerror="no" />
+	</target>
+	
+	<target name="init" depends="clear" description="init out dir">
+		<mkdir dir="${out.dir}" />
+		
+		<copy todir="${out.dir}">
+			<fileset dir="war">
+				<exclude name=".svn" />
+			</fileset>
+		</copy>
+		
+		<delete dir="${classes.dir}" failonerror="no" />
+		<mkdir dir="${classes.dir}" />
+	</target>
+	
+	<target name="javac" description="Java Build">
+		<javac debug="true" debuglevel="source,lines,vars" destdir="${classes.dir}" source="1.7" target="1.7" encoding="utf-8" includeantruntime="false">
+			<src path="${src.dir}" />
+			<classpath refid="project.class.path" />
+		</javac>
+		  	
+	    <copy todir="${classes.dir}">
+	      	<fileset dir="${src.dir}">
+	      		<exclude name="**/*.java" />
+	      		<exclude name="**/*.groovy" />
+	      		<exclude name=".svn" />
+	      	</fileset>
+	    </copy>
+	</target>
+	
+	<target name="build" depends="init, javac" description="war to test">
+	  	<propertyregex property="src-drive" input="${out.dir}/" regexp="(.*):" select="\1"/>
+	  	<propertyregex property="src-file" input="${out.dir}/" regexp="(.*):(.*)" select="\2"/>
+		
+		<echo message="window:" />
+	  	<echo message="  rsync -zvaur --chmod=ug=rwx --chmod=o=rx --delete --progress '/cygdrive/${src-drive}${src-file}' root@120.24.60.216:/root/tomcat-6/webapps/${ant.project.name}/" />
+		<echo message="unix:" />
+	  	<echo message="  rsync -zvaur --chmod=ug=rwx --chmod=o=rx --delete --progress '${out.dir}/' root@120.24.60.216:/root/tomcat-6/webapps/${ant.project.name}/" />
+    </target>
+	
+	<target name="build-product" depends="init, javac" description="war to product">
+		<copy tofile="${classes.dir}/appweb.properties" overwrite="true">
+	 		<fileset file="z-config/appweb.properties" />
+		</copy>
+		<copy tofile="${classes.dir}/log4j.xml" overwrite="true">
+	 		<fileset file="z-config/log4j.xml" />
+		</copy>
+		
+	  	<propertyregex property="src-drive" input="${out.dir}/" regexp="(.*):" select="\1"/>
+	  	<propertyregex property="src-file" input="${out.dir}/" regexp="(.*):(.*)" select="\2"/>
+		
+		<echo message="window:" />
+	  	<echo message="  rsync -zvaur --chmod=ug=rwx --chmod=o=rx --delete --progress -e 'ssh -p 2555' '/cygdrive/${src-drive}${src-file}' root@120.24.60.216:/root/tomcat-6/webapps/${ant.project.name}/" />
+		<echo message="unix:" />
+		<echo message="  rsync -zvaur --chmod=ug=rwx --chmod=o=rx --delete --progress -e 'ssh -p 2555' '${out.dir}/' root@120.24.60.216:/root/tomcat-6/webapps/${ant.project.name}/" />
+    </target>
+	
+</project>

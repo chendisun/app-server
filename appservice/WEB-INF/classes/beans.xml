@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+
+
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations" value="classpath:*.properties" />
+	</bean>
+	
+	<aop:aspectj-autoproxy />
+	
+	<context:annotation-config />
+	
+	<bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor" />
+	
+	
+	<bean id="test" class="com.sjs.www.app.server.service.TestService" />
+	<bean id="testService" class="com.sjs.www.app.server.service.Test2Service" />
+	
+	<bean id="uservaildate" class="com.sjs.www.app.server.aspect.UserSessionValidateImpl" />
+	
+	<bean id="userDao" class="com.sjs.www.app.server.dao.ipml.UserServiceDaoImpl" />
+	
+	<bean id="services" class="java.util.HashMap">
+		<constructor-arg>
+		   <map>
+		    	<entry key="APP0001" value-ref="test" />
+		    	<entry key="APP0002" value-ref="testService" />
+		   </map>
+		  </constructor-arg>
+	</bean>
+	
+	<bean id="keys" class="java.util.HashMap">
+		<constructor-arg>
+		   <map>
+		    <entry key="test" value="123456abc" />
+		   </map>
+		  </constructor-arg>
+	</bean>
+	
+</beans>
